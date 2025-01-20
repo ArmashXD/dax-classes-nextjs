@@ -2,7 +2,7 @@ import { LoginValidationSchema } from "@/lib/validations/login-form.validation";
 import { useMutation } from "@tanstack/react-query";
 import { FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
-import { submitLogin } from "../services/submit-login";
+import { submitLogin,LoginResponse } from "../services/submit-login";
 
 interface LoginValues {
   email: string;
@@ -12,21 +12,21 @@ interface LoginValues {
 export const useLogin = () => {
   const navigate = useRouter();
 
-  const mutation = useMutation({
+  const mutation = useMutation<LoginResponse, Error, LoginValues>({
     mutationFn: async (data: LoginValues) => {
-      try {
-        const response = await submitLogin(data);
-        return response;
-      } catch (error) {
-        throw error;
+      const response = await submitLogin(data);
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data && data.success) {
+        navigateToProfile();
+      } else {
+        console.log("Login failed");
       }
     },
-    onSuccess: async (data) => {
-      if (data.success) {
-        navigateToRegister();
-      }
+    onError: (error) => {
+      console.error("Login failed:", error);
     },
-    onError: () => {},
   });
 
   const handleSubmit = async (
@@ -36,25 +36,34 @@ export const useLogin = () => {
     try {
       console.log("Login attempt with:", values);
 
+   
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (mutation.isPaused) {
+        console.log("Mutation is paused, waiting for resume...");
+        return; 
+      }
+
+      mutation.mutate(values); 
       setStatus("Invalid credentials. Please try again.");
-      mutation.mutate(values);
     } catch (error: unknown) {
-      console.log(error);
+      console.error(error);
       setStatus("An error occurred. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const navigateToRegister = () => {
-    navigate.push("/profile/1");
+  const navigateToProfile = () => {
+    navigate.push("/profile/1"); 
   };
 
   return {
     initialValues: { email: "", password: "" },
     validationSchema: LoginValidationSchema,
     handleSubmit,
-    navigateToRegister,
+    navigateToProfile,
+    isMutationPaused: mutation.isPaused,  
   };
 };
+
