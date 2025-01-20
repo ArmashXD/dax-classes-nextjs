@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IRegisterFormData } from "../types";
 import Link from "next/link";
+import { useRegister } from "../hooks/useRegister";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState<IRegisterFormData>({
@@ -16,41 +18,27 @@ export default function RegisterForm() {
     confirmPassword: "",
   });
 
-  const [error, setError] = useState("");
+  const { mutation, isLoading, error } = useRegister();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
-    if (formData.email && formData.password) {
-      console.log("Login attempt with:", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setError("Invalid credentials. Please try again.");
-    } else {
-      setError("Please fill in all fields");
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
     }
+
+    mutation.mutate(formData);
   };
-
-  useEffect(() => {
-    if (error) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-    }
-  }, [error]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Name</Label>
+        <Label htmlFor="name">Name</Label>
         <Input
-          id="email"
+          id="name"
           type="text"
-          placeholder="you@example.com"
+          placeholder="John Doe"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
@@ -84,7 +72,7 @@ export default function RegisterForm() {
         <Input
           id="c_password"
           type="password"
-          value={formData.password}
+          value={formData.confirmPassword}
           onChange={(e) =>
             setFormData({ ...formData, confirmPassword: e.target.value })
           }
@@ -94,14 +82,16 @@ export default function RegisterForm() {
       {error && (
         <div className="text-red-500 text-sm flex items-center">
           <AlertCircle className="w-4 h-4 mr-2" />
-          {error}
+          {error.message}
         </div>
       )}
-      <Button type="submit" className="w-full">
-        Sign In
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Signing up..." : "Sign Up"}
       </Button>
 
-      <Link href="/login">Already have an account? Login</Link>
+      <Link href="/login" className="text-sm text-center block">
+        Already have an account? Login
+      </Link>
     </form>
   );
 }

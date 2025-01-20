@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import { submitLogin } from "../services/submit-login";
+import { toast } from "sonner";
 
 interface LoginValues {
   email: string;
@@ -10,51 +11,43 @@ interface LoginValues {
 }
 
 export const useLogin = () => {
-  const navigate = useRouter();
+  const router = useRouter();
 
   const mutation = useMutation({
     mutationFn: async (data: LoginValues) => {
-      try {
-        const response = await submitLogin(data);
-        return response;
-      } catch (error) {
-        throw error;
-      }
+      return await submitLogin(data);
     },
-    onSuccess: async (data) => {
-      if (data.success) {
-        navigateToRegister();
-      }
+    onSuccess: (data) => {
+      toast.success("Login successful!");
+      router.push("/profile");
     },
-    onError: () => {},
+    onError: (error: Error) => {
+      toast.error(error.message || "An error occurred during login");
+    },
   });
-
+  const navigateToRegister = () => {
+    router.push("/register"); 
+  };
   const handleSubmit = async (
     values: LoginValues,
     { setSubmitting, setStatus }: FormikHelpers<LoginValues>
   ) => {
     try {
-      console.log("Login attempt with:", values);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setStatus("Invalid credentials. Please try again.");
-      mutation.mutate(values);
-    } catch (error: unknown) {
-      console.log(error);
+      await mutation.mutateAsync(values);
+    } catch (error) {
+      console.error(error);
       setStatus("An error occurred. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const navigateToRegister = () => {
-    navigate.push("/profile/1");
-  };
-
   return {
     initialValues: { email: "", password: "" },
     validationSchema: LoginValidationSchema,
-    handleSubmit,
     navigateToRegister,
+    handleSubmit,
+    isLoading: mutation.isPending,
+    error: mutation.error,
   };
 };

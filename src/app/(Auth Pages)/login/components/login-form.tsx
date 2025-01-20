@@ -10,7 +10,8 @@ import { useLogin } from "../hooks/useLogin";
 export default function LoginForm() {
   const { initialValues, validationSchema, handleSubmit, navigateToRegister } =
     useLogin();
-
+   
+  
   return (
     <Formik
       initialValues={initialValues}
@@ -53,7 +54,7 @@ export default function LoginForm() {
             {isSubmitting ? "Signing In..." : "Sign In"}
           </Button>
           <Button variant="outline" onClick={navigateToRegister}>
-            Already have an account? Register
+            Don't have an account? Register
           </Button>
         </Form>
       )}
