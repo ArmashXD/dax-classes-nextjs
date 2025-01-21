@@ -1,12 +1,16 @@
-import axiosInstance from "@/config/constants/index";
-
+import axiosInstance from "@/config/axios";
 
 export interface LoginResponse {
   success: boolean;
   message: string;
 }
 
-export const submitLogin = async (data: { email: string; password: string }): Promise<LoginResponse> => {
+export interface LoginDTO {
+  email: string;
+  password: string;
+}
+
+export const submitLogin = async (data: LoginDTO): Promise<LoginResponse> => {
   const response = await axiosInstance.post<LoginResponse>("/posts", data);
 
   if (!response.data.success) {
@@ -15,4 +19,3 @@ export const submitLogin = async (data: { email: string; password: string }): Pr
 
   return response.data;
 };
-

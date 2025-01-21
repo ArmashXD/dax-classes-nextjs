@@ -2,18 +2,13 @@ import { LoginValidationSchema } from "@/lib/validations/login-form.validation";
 import { useMutation } from "@tanstack/react-query";
 import { FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
-import { submitLogin,LoginResponse } from "../services/submit-login";
-
-interface LoginValues {
-  email: string;
-  password: string;
-}
+import { submitLogin, LoginResponse, LoginDTO } from "../services/submit-login";
 
 export const useLogin = () => {
   const navigate = useRouter();
 
-  const mutation = useMutation<LoginResponse, Error, LoginValues>({
-    mutationFn: async (data: LoginValues) => {
+  const mutation = useMutation<LoginResponse, Error, LoginDTO>({
+    mutationFn: async (data: LoginDTO) => {
       const response = await submitLogin(data);
       return response;
     },
@@ -30,21 +25,20 @@ export const useLogin = () => {
   });
 
   const handleSubmit = async (
-    values: LoginValues,
-    { setSubmitting, setStatus }: FormikHelpers<LoginValues>
+    values: LoginDTO,
+    { setSubmitting, setStatus }: FormikHelpers<LoginDTO>
   ) => {
     try {
       console.log("Login attempt with:", values);
 
-   
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (mutation.isPaused) {
         console.log("Mutation is paused, waiting for resume...");
-        return; 
+        return;
       }
 
-      mutation.mutate(values); 
+      mutation.mutate(values);
       setStatus("Invalid credentials. Please try again.");
     } catch (error: unknown) {
       console.error(error);
@@ -55,7 +49,7 @@ export const useLogin = () => {
   };
 
   const navigateToProfile = () => {
-    navigate.push("/profile/1"); 
+    navigate.push("/profile/1");
   };
 
   return {
@@ -63,7 +57,6 @@ export const useLogin = () => {
     validationSchema: LoginValidationSchema,
     handleSubmit,
     navigateToProfile,
-    isMutationPaused: mutation.isPaused,  
+    isMutationPaused: mutation.isPaused,
   };
 };
-
