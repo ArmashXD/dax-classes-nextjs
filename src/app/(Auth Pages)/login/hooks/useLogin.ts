@@ -1,8 +1,11 @@
-import { LoginValidationSchema } from "@/lib/validations/login-form.validation";
+// useLogin.ts
+
 import { useMutation } from "@tanstack/react-query";
 import { FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
-import { submitLogin } from "../services/submit-login";
+import { submitLogin } from "../services/submit-login"; // Correct import for submitLogin
+import { LoginValidationSchema } from "@/lib/validations/login-form.validation"; // If you have validation schema
+import { LoginResponse } from "../page";
 
 interface LoginValues {
   email: string;
@@ -10,23 +13,28 @@ interface LoginValues {
 }
 
 export const useLogin = () => {
-  const navigate = useRouter();
+  const router = useRouter();
 
-  const mutation = useMutation({
+  // Mutation setup with LoginResponse and LoginValues types
+  const mutation = useMutation<LoginResponse, Error, LoginValues>({
     mutationFn: async (data: LoginValues) => {
       try {
         const response = await submitLogin(data);
-        return response;
+        return response; // Return the response from the submitLogin API call
       } catch (error) {
-        throw error;
+        throw new Error("Login failed"); // Throw error if login fails
       }
     },
-    onSuccess: async (data) => {
-      if (data.success) {
-        navigateToRegister();
+    onSuccess: (data) => {
+      if (data && data.success) {
+        navigateToProfile(); // Navigate to profile on success
+      } else {
+        console.log("Login failed");
       }
     },
-    onError: () => {},
+    onError: (error) => {
+      console.error("Login failed:", error);
+    },
   });
 
   const handleSubmit = async (
@@ -35,10 +43,17 @@ export const useLogin = () => {
   ) => {
     try {
       console.log("Login attempt with:", values);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Optional delay simulation
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setStatus("Invalid credentials. Please try again.");
-      mutation.mutate(values);
+      if (mutation.isPaused) {
+        console.log("Mutation is paused, waiting for resume...");
+        return;
+      }
+
+      // mutation.mutate(values); // Submit the login data via mutation
+      setStatus("Login successfull");
+      // navigateToProfile();
+      router.push("/profile/1");
     } catch (error: unknown) {
       console.log(error);
       setStatus("An error occurred. Please try again.");
@@ -48,13 +63,21 @@ export const useLogin = () => {
   };
 
   const navigateToRegister = () => {
-    navigate.push("/profile/1");
+    console.log("Executing...");
+    
+    router.push("/register"); // Navigate to the registration page
+  };
+
+  const navigateToProfile = () => {
+    router.push("/profile/1"); // Navigate to the profile page (or modify based on dynamic profile ID)
   };
 
   return {
     initialValues: { email: "", password: "" },
-    validationSchema: LoginValidationSchema,
+    validationSchema: LoginValidationSchema, // Make sure to import your validation schema
     handleSubmit,
     navigateToRegister,
+    navigateToProfile,
+    isMutationPaused: mutation.isPaused, // Whether the mutation is paused or not
   };
 };

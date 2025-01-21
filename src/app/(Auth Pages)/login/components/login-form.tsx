@@ -6,10 +6,18 @@ import { Label } from "@/components/ui/label";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { AlertCircle } from "lucide-react";
 import { useLogin } from "../hooks/useLogin";
+import { useRouter } from "next/navigation";
+import { MouseEvent } from "react";
 
 export default function LoginForm() {
-  const { initialValues, validationSchema, handleSubmit, navigateToRegister } =
-    useLogin();
+  const { initialValues, validationSchema, handleSubmit } = useLogin();
+  const router = useRouter();
+
+  // Correctly define the navigateToRegister function
+  function navigateToRegister(event: MouseEvent<HTMLButtonElement>): void {
+    event.preventDefault(); // Prevent the default form submission behavior
+    router.push("/register"); // Navigate to the register page
+  }
 
   return (
     <Formik
@@ -21,38 +29,35 @@ export default function LoginForm() {
         <Form className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Field
-              as={Input}
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-            />
+            <Field name="email" as={Input} type="email" />
             <ErrorMessage
               name="email"
               component="div"
-              className="text-red-500 text-sm"
+              className="text-red-500"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Field as={Input} id="password" name="password" type="password" />
+            <Field name="password" as={Input} type="password" />
             <ErrorMessage
               name="password"
               component="div"
-              className="text-red-500 text-sm"
+              className="text-red-500"
             />
           </div>
           {status && (
-            <div className="text-red-500 text-sm flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2" />
+            <div className="flex items-center gap-2 text-green-500">
+              <AlertCircle size={16} />
               {status}
             </div>
           )}
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Signing In..." : "Sign In"}
           </Button>
-          <Button variant="outline" onClick={navigateToRegister}>
+          <Button
+            variant="outline"
+            onClick={navigateToRegister} // Navigate to register page
+          >
             Already have an account? Register
           </Button>
         </Form>

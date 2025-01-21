@@ -1,28 +1,35 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import axiosInstance from "@/config/constants/index"; // Your axios instance setup
 import LoginForm from "./components/login-form";
-
-export default function LoginPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Welcome Back
-          </CardTitle>
-          <CardDescription className="text-center">
-            Please sign in to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <LoginForm />
-        </CardContent>
-      </Card>
-    </div>
-  );
+export interface LoginResponse {
+  success: boolean;
+  message: string;
 }
+
+export const submitLogin = async (data: {
+  email: string;
+  password: string;
+}): Promise<LoginResponse> => {
+  try {
+    // Use axios to make the POST request
+    const response = await axiosInstance.post<LoginResponse>("/login", data);
+
+    // Check if login was successful
+    if (!response.data.success) {
+      throw new Error("Login failed");
+    }
+
+    // Return response data if login is successful
+    return response.data;
+  } catch (error: any) {
+    // Handle any errors that occurred during the request
+    throw new Error(
+      error?.response?.data?.message || "An error occurred during login"
+    );
+  }
+};
+
+const Login = () => {
+  return <LoginForm />;
+};
+
+export default Login;
