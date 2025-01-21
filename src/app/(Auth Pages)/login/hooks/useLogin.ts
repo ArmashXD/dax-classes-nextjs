@@ -2,19 +2,14 @@ import { LoginValidationSchema } from "@/lib/validations/login-form.validation";
 import { useMutation } from "@tanstack/react-query";
 import { FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
-import { submitLogin } from "../services/submit-login";
+import { LoginDTO, submitLogin } from "../services/submit-login";
 import { toast } from "sonner";
-
-interface LoginValues {
-  email: string;
-  password: string;
-}
 
 export const useLogin = () => {
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: async (data: LoginValues) => {
+    mutationFn: async (data: LoginDTO) => {
       return await submitLogin(data);
     },
     onSuccess: (data) => {
@@ -26,11 +21,11 @@ export const useLogin = () => {
     },
   });
   const navigateToRegister = () => {
-    router.push("/register"); 
+    router.push("/register");
   };
   const handleSubmit = async (
-    values: LoginValues,
-    { setSubmitting, setStatus }: FormikHelpers<LoginValues>
+    values: LoginDTO,
+    { setSubmitting, setStatus }: FormikHelpers<LoginDTO>
   ) => {
     try {
       await mutation.mutateAsync(values);
@@ -42,12 +37,16 @@ export const useLogin = () => {
     }
   };
 
+  const navigateToProfile = () => {
+    router.push("/profile/1");
+  };
+
   return {
     initialValues: { email: "", password: "" },
     validationSchema: LoginValidationSchema,
-    navigateToRegister,
     handleSubmit,
-    isLoading: mutation.isPending,
-    error: mutation.error,
+    navigateToProfile,
+    navigateToRegister,
+    isMutationPaused: mutation.isPaused,
   };
 };

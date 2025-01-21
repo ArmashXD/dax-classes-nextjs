@@ -8,10 +8,14 @@ import { AlertCircle } from "lucide-react";
 import { useLogin } from "../hooks/useLogin";
 
 export default function LoginForm() {
-  const { initialValues, validationSchema, handleSubmit, navigateToRegister } =
-    useLogin();
-   
-  
+  const {
+    initialValues,
+    validationSchema,
+    handleSubmit,
+    navigateToProfile,
+    isMutationPaused,
+  } = useLogin();
+
   return (
     <Formik
       initialValues={initialValues}
@@ -50,8 +54,12 @@ export default function LoginForm() {
               {status}
             </div>
           )}
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Signing In..." : "Sign In"}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting || isMutationPaused}
+          >
+            {isSubmitting || isMutationPaused ? "Signing In..." : "Sign In"}
           </Button>
           <Button variant="outline" onClick={navigateToRegister}>
             Don't have an account? Register
