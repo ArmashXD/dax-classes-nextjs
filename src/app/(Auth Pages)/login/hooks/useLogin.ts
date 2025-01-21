@@ -1,60 +1,39 @@
-import { LoginValidationSchema } from "@/lib/validations/login-form.validation";
-import { useMutation } from "@tanstack/react-query";
-import { FormikHelpers } from "formik";
-import { useRouter } from "next/navigation";
-import { submitLogin } from "../services/submit-login";
-
-interface LoginValues {
-  email: string;
-  password: string;
-}
+import { LoginValidationSchema } from "@/lib/validations/login-form.validation"
+import { useMutation } from "@tanstack/react-query"
+import type { FormikHelpers } from "formik"
+import { useRouter } from "next/navigation"
+import { submitLogin } from "../services/submit-login"
+import type { LoginValues } from "../lib/types"
 
 export const useLogin = () => {
-  const navigate = useRouter();
+  const router = useRouter()
 
   const mutation = useMutation({
-    mutationFn: async (data: LoginValues) => {
-      try {
-        const response = await submitLogin(data);
-        return response;
-      } catch (error) {
-        throw error;
-      }
-    },
+    mutationFn: submitLogin,
     onSuccess: async (data) => {
-      if (data.success) {
-        navigateToRegister();
-      }
+      console.log("Login successful:", data)
+      router.push("/profile/1") 
     },
-    onError: () => {},
-  });
+    onError: (error: Error) => {
+      console.error("Login failed:", error.message)
+    },
+  })
 
-  const handleSubmit = async (
-    values: LoginValues,
-    { setSubmitting, setStatus }: FormikHelpers<LoginValues>
-  ) => {
+  const handleSubmit = async (values: LoginValues, { setSubmitting }: FormikHelpers<LoginValues>) => {
     try {
-      console.log("Login attempt with:", values);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setStatus("Invalid credentials. Please try again.");
-      mutation.mutate(values);
-    } catch (error: unknown) {
-      console.log(error);
-      setStatus("An error occurred. Please try again.");
+      await mutation.mutateAsync(values)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
-
-  const navigateToRegister = () => {
-    navigate.push("/profile/1");
-  };
+  }
 
   return {
     initialValues: { email: "", password: "" },
     validationSchema: LoginValidationSchema,
     handleSubmit,
-    navigateToRegister,
-  };
-};
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error?.message,
+  }
+}
