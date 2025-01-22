@@ -23,7 +23,7 @@ export default function RegisterForm() {
     setError("");
 
     if (formData.email && formData.password) {
-      console.log("Login attempt with:", {
+      console.log("Register attempt with:", { // Console log for client-side component
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -46,11 +46,11 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Name</Label>
+        <Label htmlFor="name">Name</Label>
         <Input
-          id="email"
+          id="name"
           type="text"
-          placeholder="you@example.com"
+          placeholder="Your Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
@@ -80,11 +80,11 @@ export default function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Confirm Password</Label>
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
         <Input
-          id="c_password"
+          id="confirmPassword"
           type="password"
-          value={formData.password}
+          value={formData.confirmPassword}
           onChange={(e) =>
             setFormData({ ...formData, confirmPassword: e.target.value })
           }
@@ -98,7 +98,7 @@ export default function RegisterForm() {
         </div>
       )}
       <Button type="submit" className="w-full">
-        Sign In
+        Sign Up
       </Button>
 
       <Link href="/login">Already have an account? Login</Link>

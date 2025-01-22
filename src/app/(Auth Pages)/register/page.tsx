@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import RegisterForm from "./components/register-form";
+} from "@/components/ui/card"; // Server-side component
+import RegisterForm from "./components/register-form"; // Client-side component
 
 export default function RegisterPage() {
   return (

@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import LoginForm from "./components/login-form";
+} from "@/components/ui/card"; // Server-side component
+import LoginForm from "./components/login-form"; // Client-side component
 
 export default function LoginPage() {
   return (
