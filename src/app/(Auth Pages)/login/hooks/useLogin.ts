@@ -29,7 +29,7 @@ export const useLogin = () => {
     { setSubmitting, setStatus }: FormikHelpers<LoginDTO>
   ) => {
     try {
-      console.log("Login attempt with:", values);
+      console.log("Login attempt with:", values); // Console log for client-side component
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 

@@ -16,6 +16,8 @@ export default function LoginForm() {
     isMutationPaused, 
   } = useLogin();
 
+  console.log("Rendering LoginForm Component"); // Console log for client-side component
+
   return (
     <Formik
       initialValues={initialValues}
@@ -69,4 +71,3 @@ export default function LoginForm() {
     </Formik>
   );
 }
-
