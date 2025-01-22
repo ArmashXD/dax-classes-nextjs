@@ -13,7 +13,7 @@ export default function LoginForm() {
     validationSchema,
     handleSubmit,
     navigateToProfile,
-    isMutationPaused, 
+    isMutationPaused,
   } = useLogin();
 
   return (
@@ -69,4 +69,3 @@ export default function LoginForm() {
     </Formik>
   );
 }
-
