@@ -1,8 +1,10 @@
+import { firebaseAuth } from "@/config/firebase";
 import { LoginValidationSchema } from "@/lib/validations/login-form.validation";
 import { useMutation } from "@tanstack/react-query";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
-import { submitLogin, LoginResponse, LoginDTO } from "../services/submit-login";
+import { LoginDTO, LoginResponse, submitLogin } from "../services/submit-login";
 
 export const useLogin = () => {
   const navigate = useRouter();
@@ -31,7 +33,23 @@ export const useLogin = () => {
     try {
       console.log("Login attempt with:", values);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      createUserWithEmailAndPassword(
+        firebaseAuth,
+        values.email,
+        values.password
+      )
+        .then((authUser) => {
+          console.log(
+            "Success. The user is created in Firebase, 'authUser' is: ",
+            authUser
+          );
+          // router.push("/logged_in");
+        })
+        .catch((error) => {
+          // setError(error.message)
+          console.log(error);
+        });
 
       if (mutation.isPaused) {
         console.log("Mutation is paused, waiting for resume...");

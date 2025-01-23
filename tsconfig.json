@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@styles/*": ["./src/app/globals.css"]
+      "@styles/*": ["./src/app/globals.css"],
+      "@firebase/*": ["./src/config/firebase/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
