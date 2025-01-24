@@ -1,5 +1,10 @@
 import * as Yup from "yup";
 
+export const initialValues = {
+  email: "",
+  password: ""
+};
+
 export const LoginValidationSchema = Yup.object().shape({
   email: Yup.string()
     .email("Invalid email address")

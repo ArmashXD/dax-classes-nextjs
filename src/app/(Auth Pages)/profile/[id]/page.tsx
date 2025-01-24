@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 function ProfilePage() {
   const params = useSearchParams();
 
-  console.log(params.get('id'));
+  console.log(params.get("id"));
 
   return <div>Profile</div>;
 }

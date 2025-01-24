@@ -2,12 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAAx_knJ_qqxPkJQ_xoIZnxt_c6gb6Wdys",
-  authDomain: "todoapp-eeeb7.firebaseapp.com",
-  projectId: "todoapp-eeeb7",
-  storageBucket: "todoapp-eeeb7.appspot.com",
-  messagingSenderId: "1072574112522",
-  appId: "1:1072574112522:web:65fc4e184aed9894dc90f3",
+  apiKey: "AIzaSyBXjlvSICxY4UBmI47ORV-BSRStqYwRW9E",
+  authDomain: "fir-auth-45ca4.firebaseapp.com",
+  projectId: "fir-auth-45ca4",
+  storageBucket: "fir-auth-45ca4.firebasestorage.app",
+  messagingSenderId: "493592662489",
+  appId: "1:493592662489:web:223370104f94d9003a89c8",
+  measurementId: "G-6M4VC3K9PF"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);

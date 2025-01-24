@@ -17,11 +17,13 @@
     "clsx": "^2.1.1",
     "firebase": "^11.2.0",
     "formik": "^2.4.6",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.471.1",
     "next": "15.1.4",
     "next-firebase-auth-edge": "^1.8.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-query": "^3.39.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.6.1"
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tanstack/eslint-plugin-query": "^5.64.2",
+    "@tanstack/react-query-devtools": "^5.64.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
