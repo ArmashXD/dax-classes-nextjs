@@ -4,6 +4,7 @@ import axios, {
   AxiosRequestConfig,
   AxiosResponse,
 } from "axios";
+import Cookies from "js-cookie";
 
 class BaseAxios {
   private postAxiosInstance: AxiosInstance;
@@ -20,6 +21,19 @@ class BaseAxios {
   }
 
   private setupInterceptors() {
+    this.postAxiosInstance.interceptors.request.use(
+      (config) => {
+        const token = Cookies.get("token")
+        if (token) {
+          config.headers["Authorization"] = `Bearer ${token}`
+        }
+        return config
+      },
+      (error) => {
+        return Promise.reject(error)
+      },
+    )
+
     this.postAxiosInstance.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: AxiosError) => {
