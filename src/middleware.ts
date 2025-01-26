@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const url = request.nextUrl.pathname; // profile/:id --> authenticated
-  const token = request.cookies.get("token");
-
+  const url = request.nextUrl.pathname;
+  const token = request.cookies.get("auth-token");
   const isTokenValid = token && token?.value !== "undefined";
 
   const guestRoutes = ["/login", "/register", "/"];
@@ -17,12 +16,11 @@ export function middleware(request: NextRequest) {
   }
 
   if (!isTokenValid) {
-    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/profile/:id"],
+  matcher: ["/login", "/register", "/profile/:id", "/dashboard", "/"],
 };
