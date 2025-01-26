@@ -1,74 +1,67 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import { useUser } from '@/app/context/userContext'; 
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { firebaseAuth } from '@/config/firebase';
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { firebaseAuth } from "@/config/firebase";
-import {
-  initialValues,
-  LoginValidationSchema,
-} from "@/lib/validations/login-form.validation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
-import { AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { useLogin } from "../hooks/useLogin";
-import { LoginDTO } from "../services/submit-login";
-
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
-  const { mutation } = useLogin();
   const router = useRouter();
+  const { setUser, user } = useUser(); 
 
-  const handleSubmit = async (
-    values: LoginDTO,
-    { setSubmitting }: FormikHelpers<LoginDTO>
-  ) => {
+  useEffect(() => {
+    // If user is already logged in redirect to dashboard
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+  const handleSubmit = async (values: { email: string; password: string }) => {
     try {
-      await signInWithEmailAndPassword(
+      const authUser = await signInWithEmailAndPassword(
         firebaseAuth,
         values.email,
         values.password
-      )
-        .then((authUser) => {
-          console.log(
-            "Success. The user is created in Firebase, 'authUser' is: ",
-            authUser
-          );
-          localStorage.setItem("user", JSON.stringify(authUser.user));
+      );
+      console.log('User logged in:', authUser.user);
 
-          authUser.user?.getIdToken().then((token) => {
-            // localStorage.setItem("token", token);
-            Cookies.set("token", token);
-          });
-          router.push("/dashboard");
-        })
-        .catch((error) => {
-          // setError(error.message)
-          console.log(error);
+      if (authUser.user.email && authUser.user.uid) {
+        const userData = {
+          email: authUser.user.email,
+          uid: authUser.user.uid,
+        };
+
+        // Save user data in localStorage
+        localStorage.setItem('user', JSON.stringify(userData)); 
+        setUser(userData); 
+
+        // Save token in cookies
+        authUser.user.getIdToken().then((token) => {
+          Cookies.set('token', token); 
         });
 
-      if (mutation.isPaused) {
-        return;
+        // Redirect to dashboard
+        router.push('/dashboard');
+      } else {
+        console.error('Error: Email or UID is null');
       }
-
-      mutation.mutate(values);
-    } catch (error: unknown) {
-      console.error(error);
-    } finally {
-      setSubmitting(false);
+    } catch (error) {
+      console.error('Login failed:', error);
     }
   };
 
   return (
     <Formik
-      initialValues={initialValues}
-      validationSchema={LoginValidationSchema}
+      initialValues={{ email: '', password: '' }}
       onSubmit={handleSubmit}
     >
-      {({ isSubmitting, status }) => (
+      {({ isSubmitting }) => (
         <Form className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -78,6 +71,7 @@ export default function LoginForm() {
               name="email"
               type="email"
               placeholder="you@example.com"
+              className="input"
             />
             <ErrorMessage
               name="email"
@@ -87,29 +81,26 @@ export default function LoginForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Field as={Input} id="password" name="password" type="password" />
+            <Field
+              as={Input}
+              id="password"
+              name="password"
+              type="password"
+              className="input"
+            />
             <ErrorMessage
               name="password"
               component="div"
               className="text-red-500 text-sm"
             />
           </div>
-          {status && (
-            <div className="text-red-500 text-sm flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2" />
-              {status}
-            </div>
-          )}
           <Button
             type="submit"
             className="w-full"
-            disabled={isSubmitting || mutation.isPaused || mutation.isPending}
+            disabled={isSubmitting}
           >
-            {isSubmitting || mutation.isPaused || mutation.isPending
-              ? "Signing In..."
-              : "Sign In"}
+            {isSubmitting ? "Signing In..." : "Sign In"}
           </Button>
-          <Link href="/register">Already have an account? Register</Link>
         </Form>
       )}
     </Formik>
