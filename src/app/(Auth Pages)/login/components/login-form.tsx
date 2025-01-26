@@ -1,117 +1,103 @@
 "use client";
-
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { firebaseAuth } from "@/config/firebase";
-import {
-  initialValues,
-  LoginValidationSchema,
-} from "@/lib/validations/login-form.validation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useLogin } from "../hooks/useLogin";
-import { LoginDTO } from "../services/submit-login";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { firebaseAuth } from "@/config/firebase";
+import { useUser } from "@/providers/UserContext";
 
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-
-export default function LoginForm() {
-  const { mutation } = useLogin();
+function LoginForm() {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { setUser } = useUser();
 
-  const handleSubmit = async (
-    values: LoginDTO,
-    { setSubmitting }: FormikHelpers<LoginDTO>
-  ) => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMessage("");
+
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(
+      let userData = await signInWithEmailAndPassword(
         firebaseAuth,
-        values.email,
-        values.password
-      )
-        .then((authUser) => {
-          console.log(
-            "Success. The user is created in Firebase, 'authUser' is: ",
-            authUser
-          );
-          localStorage.setItem("user", JSON.stringify(authUser.user));
+        formData.email,
+        formData.password
+      );
+      setSuccessMessage("You have been logged in successfully!");
+      setUser({
+        uid: userData?.user?.uid,
+        name: userData?.user?.displayName,
+        email: userData?.user?.email,
+      });
 
-          authUser.user?.getIdToken().then((token) => {
-            // localStorage.setItem("token", token);
-            Cookies.set("token", token);
-          });
-          router.push("/dashboard");
-        })
-        .catch((error) => {
-          // setError(error.message)
-          console.log(error);
-        });
-
-      if (mutation.isPaused) {
-        return;
-      }
-
-      mutation.mutate(values);
-    } catch (error: unknown) {
-      console.error(error);
-    } finally {
-      setSubmitting(false);
+      router.push("/dashboard"); // Redirect to the dashboard page
+    } catch (error) {
+      console.error("Error logging in:", error);
+      setError("Error logging in. Please try again.");
     }
   };
 
+  if (!mounted) return null; // Only render after the component is mounted
+
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={LoginValidationSchema}
-      onSubmit={handleSubmit}
-    >
-      {({ isSubmitting, status }) => (
-        <Form className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Field
-              as={Input}
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-            />
-            <ErrorMessage
-              name="email"
-              component="div"
-              className="text-red-500 text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Field as={Input} id="password" name="password" type="password" />
-            <ErrorMessage
-              name="password"
-              component="div"
-              className="text-red-500 text-sm"
-            />
-          </div>
-          {status && (
-            <div className="text-red-500 text-sm flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2" />
-              {status}
-            </div>
-          )}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || mutation.isPaused || mutation.isPending}
-          >
-            {isSubmitting || mutation.isPaused || mutation.isPending
-              ? "Signing In..."
-              : "Sign In"}
-          </Button>
-          <Link href="/register">Already have an account? Register</Link>
-        </Form>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="you@example.com"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input
+          id="password"
+          type="password"
+          value={formData.password}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
+          required
+        />
+      </div>
+      {error && (
+        <div className="text-red-500 text-sm flex items-center">
+          <AlertCircle className="w-4 h-4 mr-2" />
+          {error}
+        </div>
       )}
-    </Formik>
+      {successMessage && (
+        <div className="text-green-500 text-sm flex items-center">
+          <AlertCircle className="w-4 h-4 mr-2" />
+          {successMessage}
+        </div>
+      )}
+      <Button type="submit" className="w-full">
+        Login
+      </Button>
+
+      <Link href="/register">Don't have an account? Register</Link>
+    </form>
   );
 }
+
+export default LoginForm;
