@@ -32,6 +32,7 @@
     "@eslint/eslintrc": "^3",
     "@tanstack/eslint-plugin-query": "^5.64.2",
     "@tanstack/react-query-devtools": "^5.64.2",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
